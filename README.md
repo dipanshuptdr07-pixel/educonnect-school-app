@@ -1,31 +1,9 @@
-# EduConnect Full MVP
+# EduConnect School App
 
-Responsive multi-school education platform prototype.
+Phone-friendly PWA MVP for a multi-school education platform.
 
-## Included
-- Parent / Student / Teacher / School Admin roles
-- School code + phone demo login
-- Dashboard
-- Homework creation/deletion
-- Attendance
-- Timetable
-- Results
-- Notices/circulars
-- Documents/PDF upload UI
-- Study AI UI placeholder
-- Responsive mobile/tablet/desktop layout
-- Local persistence via browser storage
-- PWA manifest
+Includes Parent, Student, Teacher and Admin roles; homework, attendance, timetable, results, notices, documents/PDF upload UI, Study AI placeholder, responsive UI, local browser storage, PWA manifest and service worker.
 
-## Demo accounts
-Any phone works in demo mode. Existing seeded accounts:
-- Parent: 9999999999
-- Student: 8888888888
-- Teacher: 7777777777
-- Admin: 6666666666
-School code: DEMO01
+Demo school code: `DEMO01`. Any 10-digit phone number works in demo mode.
 
-## Important
-This is a functional local MVP, not a production school system. Real OTP, cloud database,
-file storage, push notifications, school isolation, audit logs, and AI API integration must
-be added before real schools use it.
+This is a prototype. Real OTP, cloud database, secure school isolation, file storage, push notifications and production AI integration are still required before real-school use.
