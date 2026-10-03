@@ -759,12 +759,17 @@
     });
   }
 
+    window.demoLogin = demoLogin;
+  window.handleLogin = handleLogin;
+  window.logoutUser = logoutUser;
+  window.toggleMenu = toggleMenu;
+  window.go = go;
+  window.setTheme = setTheme;
+  window.toggleNotifications = toggleNotifications;
+  window.setLanguage = setLanguage;
+  window.switchAccount = switchAccount;
+  window.demoAction = demoAction;
+
   render();
 
 })();
-  
-                
-  
-  
-  
-  
