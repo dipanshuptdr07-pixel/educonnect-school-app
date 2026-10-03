@@ -1,4 +1,4 @@
-const KEY = "educonnect_v11";
+const KEY = "educonnect_v12";
 
 const seed = {
   schools: [
@@ -216,7 +216,6 @@ function esc(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
 function me() {
   return state.users.find(u => u.id === currentUserId) || null;
 }
@@ -266,7 +265,63 @@ function formatDate(date) {
     }
   );
 }
+function emptyState(text) {
+  return `
+    <div class="card empty-state">
+      <h3>${esc(text)}</h3>
+    </div>
+  `;
+}
 
+function classOptions(selected = "") {
+  const s = mySchool();
+  if (!s) return "";
+
+  return s.classes
+    .map(x => `
+      <option value="${esc(x)}" ${x === selected ? "selected" : ""}>
+        Class ${esc(x)}
+      </option>
+    `)
+    .join("");
+}
+
+function sectionOptions(selected = "") {
+  const s = mySchool();
+  if (!s) return "";
+
+  return s.sections
+    .map(x => `
+      <option value="${esc(x)}" ${x === selected ? "selected" : ""}>
+        Section ${esc(x)}
+      </option>
+    `)
+    .join("");
+}
+
+function subjectOptions(selected = "") {
+  const s = mySchool();
+  if (!s) return "";
+
+  return s.subjects
+    .map(x => `
+      <option value="${esc(x)}" ${x === selected ? "selected" : ""}>
+        ${esc(x)}
+      </option>
+    `)
+    .join("");
+}
+
+function studentOptions() {
+  return schoolUsers()
+    .filter(u => u.role === "student")
+    .map(u => `
+      <option value="${esc(u.id)}">
+        ${esc(u.name)} — ${esc(u.className || "-")}-${esc(u.section || "-")}
+      </option>
+    `)
+    .join("");
+}
 function notify(message) {
   alert(message);
 }
@@ -363,68 +418,33 @@ function nav(page) {
 }
 
 function addUser() {
-  const role =
-    document.getElementById("newUserRole").value;
+  if (!me() || me().role === "student") return;
 
-  const name =
-    document.getElementById("newUserName").value.trim();
+  const name = document.getElementById("userName")?.value.trim();
+  const phone = document.getElementById("userPhone")?.value.trim();
+  const role = document.getElementById("userRole")?.value;
+  const className = document.getElementById("userClass")?.value || "";
+  const section = document.getElementById("userSection")?.value || "";
 
-  const phone =
-    document.getElementById("newUserPhone").value.trim();
-
-  const className =
-    document.getElementById("newUserClass").value;
-
-  const section =
-    document.getElementById("newUserSection").value;
-
-  if (!name || !phone) {
-    notify("Name and phone are required.");
+  if (!name || !phone || !role) {
+    notify("Please fill all required fields.");
     return;
   }
 
-  if (
-    schoolUsers().some(
-      u => u.phone === phone
-    )
-  ) {
-    notify(
-      "This phone number already exists in your school."
-    );
-    return;
-  }
+  const schoolId = me().schoolId;
 
   state.users.push({
     id: uid("u"),
-    schoolId: me().schoolId,
-    role,
+    schoolId,
     name,
     phone,
-
-    className:
-      role === "student"
-        ? className
-        : "",
-
-    section:
-      role === "student"
-        ? section
-        : "",
-
-    subject:
-      role === "teacher"
-        ? (
-            document.getElementById(
-              "newUserSubject"
-            )?.value || ""
-          )
-        : ""
+    role,
+    className: role === "admin" ? "" : className,
+    section: role === "admin" ? "" : section
   });
 
   saveState();
-
-  notify("Account created successfully.");
-
+  notify("User added successfully.");
   render();
 }
 
@@ -804,46 +824,6 @@ function addFee() {
     document.getElementById("feeStudent")
       .value;
 
-  const title =
-    document.getElementById("feeTitle")
-      .value.trim();
-
-  const amount =
-    Number(
-      document.getElementById("feeAmount")
-        .value
-    );
-
-  const status =
-    document.getElementById("feeStatus")
-      .value;
-
-  if (
-    !studentId ||
-    !title ||
-    Number.isNaN(amount)
-  ) {
-    notify(
-      "Please fill all fee details."
-    );
-    return;
-  }
-
-  state.fees.push({
-    id: uid("f"),
-    schoolId: me().schoolId,
-    studentId,
-    title,
-    amount,
-    status
-  });
-
-  saveState();
-
-  notify("Fee record added.");
-
-  render();
-}
 
 function addEvent() {
   const title =
