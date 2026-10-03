@@ -458,7 +458,7 @@ function renderLogin(){
 function card(icon,title,page){
   return `
     <button
-      class="card premium-card"
+      class="card premium-card card-${page}"
       onclick="go('${page}')">
 
       <div class="card-art">
