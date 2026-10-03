@@ -455,31 +455,27 @@ function renderLogin(){
     `;
   }
 
-  function card(icon,title,page){
-    return `
-      <button
-        class="card"
-        style="border:1px solid #e5e9f2;
-               text-align:left;
-               min-height:145px;
-               background:#fff"
-        onclick="go('${page}')">
+function card(icon,title,page){
+  return `
+    <button
+      class="card premium-card"
+      onclick="go('${page}')">
 
-        <div style="font-size:38px">
-          ${icon}
-        </div>
+      <div class="card-art">
+        <span>${icon}</span>
+      </div>
 
-        <div class="num"
-             style="font-size:20px">
-          ${title}
-        </div>
+      <div class="card-title">
+        ${title}
+      </div>
 
-        <div class="muted">
-          Open ${title}
-        </div>
-      </button>
-    `;
-  }
+      <div class="card-open">
+        Tap to open →
+      </div>
+
+    </button>
+  `;
+}
     function renderProfile(){
     const u = currentUser();
 
