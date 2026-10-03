@@ -149,3 +149,56 @@ body.dark .card-title{
 body.dark .card-art{
   background:#1f2937;
 }
+/* DASHBOARD ILLUSTRATION LAYER */
+
+.premium-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+
+.premium-card::after{
+  content:"";
+  position:absolute;
+  width:115px;
+  height:115px;
+  right:-25px;
+  bottom:-30px;
+  border-radius:50%;
+  background:#edf1ff;
+  opacity:.9;
+  z-index:-1;
+}
+
+.premium-card::before{
+  content:"";
+  position:absolute;
+  width:70px;
+  height:70px;
+  right:25px;
+  top:22px;
+  border-radius:22px;
+  background:#f5f7ff;
+  transform:rotate(15deg);
+  z-index:-1;
+}
+
+.card-art{
+  position:relative;
+  z-index:2;
+  box-shadow:0 8px 20px #3157d51a;
+}
+
+.card-title,
+.card-open{
+  position:relative;
+  z-index:2;
+}
+
+body.dark .premium-card::after{
+  background:#1f2937;
+}
+
+body.dark .premium-card::before{
+  background:#172033;
+  }
