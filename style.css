@@ -294,3 +294,48 @@ body.dark .card-events .card-art,
 body.dark .card-feedback .card-art{
   background:#1f2937;
 }
+/* CARD COLORS FIX */
+
+.premium-card.card-attendance .card-art{
+  background:#e8f0ff !important;
+}
+
+.premium-card.card-homework .card-art{
+  background:#fff3df !important;
+}
+
+.premium-card.card-notices .card-art{
+  background:#fff0f0 !important;
+}
+
+.premium-card.card-results .card-art{
+  background:#eaf8ef !important;
+}
+
+.premium-card.card-notifications .card-art{
+  background:#fff4d9 !important;
+}
+
+.premium-card.card-contacts .card-art{
+  background:#f1eaff !important;
+}
+
+.premium-card.card-exams .card-art{
+  background:#e9f7f7 !important;
+}
+
+.premium-card.card-fees .card-art{
+  background:#edf7e8 !important;
+}
+
+.premium-card.card-leave .card-art{
+  background:#fff0e7 !important;
+}
+
+.premium-card.card-events .card-art{
+  background:#f5eaff !important;
+}
+
+.premium-card.card-feedback .card-art{
+  background:#e8f5ff !important;
+}
