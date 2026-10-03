@@ -1170,7 +1170,12 @@ function dashboard() {
         "Results",
         "📊"
       )}
+${u.role !== "student"
+  ? quickButton("schoolmanagement", "School Management", "🏫")
+  : ""
+}
 
+${quickButton("fees", "Fees", "₹")}
       ${quickButton(
         "notices",
         "Notices",
