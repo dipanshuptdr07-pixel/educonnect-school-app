@@ -1,4 +1,4 @@
-const CACHE = "educonnect-v12";
+const CACHE = "educonnect-v14";
 
 const ASSETS = [
   "./",
