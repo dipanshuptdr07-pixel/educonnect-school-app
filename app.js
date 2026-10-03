@@ -236,17 +236,22 @@ function side() {
 /* DARK MODE */
 
 function toggleDark() {
-  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.toggle("dark");
 
-  localStorage.setItem(
-    "edu_dark",
-    document.body.classList.contains("dark") ? "1" : "0"
-  );
+  localStorage.setItem("edu_dark", isDark ? "1" : "0");
+
+  if (S.user) {
+    app();
+  } else {
+    login();
+  }
 }
 
 function loadDark() {
   if (localStorage.getItem("edu_dark") === "1") {
     document.body.classList.add("dark");
+  } else {
+    document.body.classList.remove("dark");
   }
 }
 
