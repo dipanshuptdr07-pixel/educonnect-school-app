@@ -1669,6 +1669,42 @@ function startApp(){
 
 /* Start EduConnect */
 
+function nav(){
+
+  const items = isStaff()
+    ? [
+        ["home","⌂","Dashboard"],
+        ["attendance","✓","Attendance"],
+        ["homework","📚","Homework"],
+        ["notices","🔔","Notices"],
+        ["results","📊","Results"],
+        ["ptm","👥","PTM"],
+        ["contacts","☎","Contacts"]
+      ]
+    : [
+        ["home","⌂","Dashboard"],
+        ["attendance","✓","Attendance"],
+        ["homework","📚","Homework"],
+        ["notices","🔔","Notices"],
+        ["results","📊","Results"],
+        ["contacts","☎","Contacts"],
+        ["exams","🗓","Exams"],
+        ["fees","₹","Fees"],
+        ["leave","📝","Leave"],
+        ["events","🎉","Events"],
+        ["feedback","💬","Feedback"],
+        ["study","🤖","Study AI"]
+      ];
+
+  return items.map(x => `
+    <button
+      class="${page === x[0] ? "on" : ""}"
+      onclick="setPage('${x[0]}')">
+      ${x[1]} ${x[2]}
+    </button>
+  `).join("");
+}
+
 startApp();
 
    
