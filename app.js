@@ -2861,20 +2861,241 @@ function schoolManagementPage() {
                                     '${user.id}'
                                   )
                                 "
-                              >
-                                Remove
-                              </button>
-                            `
-                            : "You"
-                        }
+function schoolManagementPage() {
+  const u = me();
 
-                      </td>
-                    `
-                    : ""
-                }
+  if (u.role === "student") {
+    return `
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">
+            ADMINISTRATION
+          </div>
 
-              </tr>
-            `).join("")
+          <h1>
+            School Management
+          </h1>
+        </div>
+
+        <button
+          class="secondary"
+          onclick="nav('dashboard')"
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
+
+      <div class="card form-card">
+
+        <h2>
+          Access restricted
+        </h2>
+
+        <p>
+          Only school Admin and Teachers
+          can access this section.
+        </p>
+
+      </div>
+    `;
+  }
+
+  const users = schoolUsers();
+
+  return `
+    <div class="page-header">
+
+      <div>
+
+        <div class="eyebrow">
+          ADMINISTRATION
+        </div>
+
+        <h1>
+          School Management
+        </h1>
+
+        <p>
+          Manage accounts inside
+          ${esc(mySchool().name)}
+          only.
+        </p>
+
+      </div>
+
+      <button
+        class="secondary"
+        onclick="nav('dashboard')"
+      >
+        ← Back to Dashboard
+      </button>
+
+    </div>
+
+    <div class="card school-info">
+
+      <strong>
+        ${esc(mySchool().name)}
+      </strong>
+
+      <span>
+        School Code:
+        ${esc(mySchool().code)}
+      </span>
+
+      <span>
+        ${esc(mySchool().city)}
+      </span>
+
+    </div>
+
+    ${
+      u.role === "admin"
+        ? `
+          <div class="card form-card">
+
+            <h2>
+              Add Student / Teacher
+            </h2>
+
+            <div class="form-grid">
+
+              <select id="newUserRole">
+                <option value="student">
+                  Student
+                </option>
+
+                <option value="teacher">
+                  Teacher
+                </option>
+              </select>
+
+              <input
+                id="newUserName"
+                placeholder="Full name"
+              >
+
+              <input
+                id="newUserPhone"
+                placeholder="Phone number"
+                inputmode="numeric"
+              >
+
+              <select id="newUserClass">
+                ${classOptions()}
+              </select>
+
+              <select id="newUserSection">
+                ${sectionOptions()}
+              </select>
+
+              <select id="newUserSubject">
+                ${subjectOptions()}
+              </select>
+
+            </div>
+
+            <button
+              class="primary"
+              onclick="addUser()"
+            >
+              + Create Account
+            </button>
+
+          </div>
+        `
+        : ""
+    }
+
+    <div class="table-wrap card">
+
+      <table>
+
+        <thead>
+          <tr>
+
+            <th>Name</th>
+            <th>Role</th>
+            <th>Phone</th>
+            <th>Class</th>
+            <th>Section</th>
+
+            ${
+              u.role === "admin"
+                ? "<th>Action</th>"
+                : ""
+            }
+
+          </tr>
+        </thead>
+
+        <tbody>
+
+          ${
+            users.length
+              ? users.map(user => `
+                  <tr>
+
+                    <td>
+                      ${esc(user.name)}
+                    </td>
+
+                    <td>
+                      <span class="badge">
+                        ${roleLabel(user.role)}
+                      </span>
+                    </td>
+
+                    <td>
+                      ${esc(user.phone)}
+                    </td>
+
+                    <td>
+                      ${esc(
+                        user.className || "-"
+                      )}
+                    </td>
+
+                    <td>
+                      ${esc(
+                        user.section || "-"
+                      )}
+                    </td>
+
+                    ${
+                      u.role === "admin"
+                        ? `
+                          <td>
+                            ${
+                              user.id !== u.id
+                                ? `
+                                  <button
+                                    class="danger small"
+                                    onclick="
+                                      removeUser(
+                                        '${user.id}'
+                                      )
+                                    "
+                                  >
+                                    Remove
+                                  </button>
+                                `
+                                : "<span class='badge'>You</span>"
+                            }
+                          </td>
+                        `
+                        : ""
+                    }
+
+                  </tr>
+                `).join("")
+              : `
+                  <tr>
+                    <td colspan="6">
+                      No accounts found.
+                    </td>
+                  </tr>
+                `
           }
 
         </tbody>
