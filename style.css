@@ -339,3 +339,69 @@ body.dark .card-feedback .card-art{
 .premium-card.card-feedback .card-art{
   background:#e8f5ff !important;
 }
+/* PREMIUM TOP HEADER */
+
+.top{
+  background:#fff;
+  border:1px solid #e5e9f2;
+  border-radius:20px;
+  padding:15px 17px;
+  box-shadow:0 8px 24px #1f32640d;
+}
+
+.top h1{
+  font-size:22px;
+  font-weight:850;
+  letter-spacing:-.3px;
+}
+
+.top .muted{
+  font-size:13px;
+  margin-top:2px;
+}
+
+.top .pill{
+  border:1px solid #e5e9f2;
+  background:#f8f9fd;
+  padding:6px 10px 6px 7px;
+  border-radius:15px;
+}
+
+.top .avatar{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:#3157d5;
+  color:#fff;
+}
+
+body.dark .top{
+  background:#111827;
+  border-color:#374151;
+  box-shadow:none;
+}
+
+body.dark .top .pill{
+  background:#1f2937;
+  border-color:#374151;
+}
+
+@media(max-width:700px){
+  .top{
+    padding:12px;
+    border-radius:17px;
+  }
+
+  .top h1{
+    font-size:20px;
+  }
+
+  .top .pill span{
+    display:none;
+  }
+
+  .top .pill{
+    padding:4px;
+    border-radius:13px;
+  }
+}
