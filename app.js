@@ -1242,18 +1242,15 @@ function homeworkPage() {
 
   return `
     <div class="page-header">
-      <div>
-        <div class="eyebrow">
-          ACADEMICS
-        </div>
+  <div>
+    <h2>Homework</h2>
+    <p>Manage and view homework</p>
+  </div>
 
-        <h1>Homework</h1>
-
-        <p>
-          School-wise homework management.
-        </p>
-      </div>
-    </div>
+  <button class="secondary" onclick="nav('dashboard')">
+    ← Back to Dashboard
+  </button>
+</div>
 
     ${
       u.role !== "student"
@@ -2222,6 +2219,225 @@ function feesPage() {
     </div>
   `;
                       }
+  function feesPage() {
+  const u = me();
+
+  const fees = state.fees.filter(f =>
+    sameSchool(f)
+  );
+
+  return `
+    <div class="page-header">
+      <div>
+        <h2>Fees</h2>
+        <p>Fee records and payment status</p>
+      </div>
+
+      <button class="secondary" onclick="nav('dashboard')">
+        ← Back to Dashboard
+      </button>
+    </div>
+
+    ${
+      u.role !== "student"
+        ? `
+          <div class="card">
+            <h3>Add Fee Record</h3>
+
+            <div class="form-grid">
+              <select id="feeStudent">
+                ${studentOptions()}
+              </select>
+
+              <input
+                id="feeAmount"
+                type="number"
+                placeholder="Amount"
+              >
+
+              <input
+                id="feeTitle"
+                placeholder="Fee title"
+              >
+
+              <select id="feeStatus">
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+
+            <button class="primary" onclick="addFee()">
+              Add Fee
+            </button>
+          </div>
+        `
+        : ""
+    }
+
+    <div class="card">
+      <h3>Fee Records</h3>
+
+      ${
+        fees.length
+          ? `
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  ${fees.map(f => {
+                    const student = state.users.find(
+                      x => x.id === f.studentId
+                    );
+
+                    return `
+                      <tr>
+                        <td>${esc(student?.name || "-")}</td>
+                        <td>${esc(f.title || "-")}</td>
+                        <td>₹${esc(f.amount || 0)}</td>
+                        <td>${esc(f.status || "Pending")}</td>
+                      </tr>
+                    `;
+                  }).join("")}
+                </tbody>
+              </table>
+            </div>
+          `
+          : emptyState("No fee records found.")
+      }
+    </div>
+  `;
+                  }
+  function schoolManagementPage() {
+  const u = me();
+
+  if (!u || u.role === "student") {
+    return `
+      <div class="card">
+        <h2>Access denied</h2>
+        <p>Only Admin and Teacher can access School Management.</p>
+        <button class="secondary" onclick="nav('dashboard')">
+          ← Back to Dashboard
+        </button>
+      </div>
+    `;
+  }
+
+  const users = schoolUsers();
+
+  return `
+    <div class="page-header">
+      <div>
+        <h2>School Management</h2>
+        <p>Manage users and school data</p>
+      </div>
+
+      <button class="secondary" onclick="nav('dashboard')">
+        ← Back to Dashboard
+      </button>
+    </div>
+
+    ${
+      u.role === "admin"
+        ? `
+          <div class="card">
+            <h3>Add User</h3>
+
+            <div class="form-grid">
+
+              <input
+                id="userName"
+                placeholder="Full name"
+              >
+
+              <input
+                id="userPhone"
+                placeholder="Phone number"
+              >
+
+              <select id="userRole">
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+              </select>
+
+              <select id="userClass">
+                <option value="">Select Class</option>
+                ${classOptions()}
+              </select>
+
+              <select id="userSection">
+                <option value="">Select Section</option>
+                ${sectionOptions()}
+              </select>
+
+            </div>
+
+            <button class="primary" onclick="addUser()">
+              Add User
+            </button>
+          </div>
+        `
+        : ""
+    }
+
+    <div class="card">
+      <h3>School Users</h3>
+
+      ${
+        users.length
+          ? `
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  ${users.map(user => `
+                    <tr>
+                      <td>${esc(user.name)}</td>
+                      <td>${esc(roleLabel(user.role))}</td>
+                      <td>${esc(user.className || "-")}</td>
+                      <td>${esc(user.section || "-")}</td>
+                      <td>
+                        ${
+                          user.id !== u.id && u.role === "admin"
+                            ? `
+                              <button
+                                class="danger"
+                                onclick="removeUser('${esc(user.id)}')"
+                              >
+                                Remove
+                              </button>
+                            `
+                            : "-"
+                        }
+                      </td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          `
+          : emptyState("No users found.")
+      }
+    </div>
+  `;
+  }
 
 function eventsPage() {
   const u = me();
@@ -3739,12 +3955,6 @@ function pageContent() {
     case "profile":
       return profilePage();
 
-    case "settings":
-      return settingsPage();
-
-    case "accounts":
-      return accountsPage();
-
     default:
       return dashboard();
   }
@@ -3752,37 +3962,18 @@ function pageContent() {
 
 
 function render() {
+  const app = document.getElementById("app");
+
+  if (!me()) {
+    app.innerHTML = loginPage();
+    return;
+  }
+
+  app.innerHTML = layout();
 
   document.body.classList.toggle(
     "dark",
-    localStorage.getItem(
-      "educonnect_dark"
-    ) === "1"
+    localStorage.getItem("educonnect_dark") === "1"
   );
-
-  const root =
-    document.getElementById("app");
-
-  if (!root) {
-    return;
-  }
-
-  if (!me()) {
-
-    root.innerHTML =
-      loginPage();
-
-    return;
-  }
-
-  root.innerHTML =
-    layout(
-      pageContent()
-    );
 }
-
-
-document.addEventListener(
-  "DOMContentLoaded",
-  startApp
-);
+  document.addEventListener("DOMContentLoaded", startApp);
