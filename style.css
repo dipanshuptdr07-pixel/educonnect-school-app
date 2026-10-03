@@ -42,3 +42,62 @@ body.dark th,
 body.dark td {
   border-color: #374151;
 }
+/* EDUCONNECT PREMIUM MOBILE POLISH */
+
+.card{
+  transition:transform .18s ease,box-shadow .18s ease;
+  overflow:hidden;
+}
+
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 34px #1f32641c;
+}
+
+.btn{
+  transition:transform .15s ease,opacity .15s ease;
+}
+
+.btn:active{
+  transform:scale(.97);
+}
+
+@media(max-width:700px){
+
+  body{
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .main{
+    padding:14px;
+  }
+
+  .top{
+    margin-bottom:16px;
+  }
+
+  .card{
+    border-radius:20px;
+    padding:17px;
+  }
+
+  .grid{
+    gap:12px;
+  }
+
+  .grid .card{
+    min-height:120px;
+  }
+
+  .btn{
+    min-height:44px;
+  }
+
+  .input{
+    min-height:46px;
+  }
+
+  .nav button{
+    min-height:44px;
+  }
+}
