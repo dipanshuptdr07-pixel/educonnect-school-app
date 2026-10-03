@@ -1,0 +1,328 @@
+/* EduConnect — robust frontend/localStorage app.js
+   Keeps the existing MVP UI style and adds the missing Results/Exams/Fees/
+   Events/PTM/Leave/Feedback/Study AI/Profile/School Management routes.
+*/
+(() => {
+  "use strict";
+
+  const K = "edu_";
+  const ROLES = ["Parent", "Student", "Teacher", "Admin"];
+  const PAGES = ["Dashboard","Homework","Attendance","Timetable","Results","Exams","Fees","Events","PTM","Leave","Feedback","Documents","Study AI","Profile","School Management"];
+
+  const DEFAULTS = {
+    hw: [
+      {id:1,s:"Mathematics",t:"Trigonometric Functions — Exercise 3",d:"Tomorrow",st:"Pending"},
+      {id:2,s:"Physics",t:"Laws of Motion DPP",d:"Friday",st:"Pending"},
+      {id:3,s:"Chemistry",t:"Mole Concept practice",d:"Monday",st:"Submitted"}
+    ],
+    nt: [
+      {id:1,t:"Parent–Teacher Meeting",d:"10 Oct 2026",x:"Meeting schedule will be shared by class teachers."},
+      {id:2,t:"Sports Registration",d:"12 Oct 2026",x:"Submit sports participation details to the office."}
+    ],
+    results: [
+      {id:1,exam:"Unit Test • September 2026",subject:"Physics",marks:"88/100",grade:"A"},
+      {id:2,exam:"Unit Test • September 2026",subject:"Mathematics",marks:"91/100",grade:"A+"},
+      {id:3,exam:"Unit Test • September 2026",subject:"Chemistry",marks:"86/100",grade:"A"}
+    ],
+    exams: [
+      {id:1,name:"Half Yearly Examination",date:"20 Oct 2026",subject:"Physics"},
+      {id:2,name:"Half Yearly Examination",date:"22 Oct 2026",subject:"Mathematics"},
+      {id:3,name:"Half Yearly Examination",date:"24 Oct 2026",subject:"Chemistry"}
+    ],
+    fees: [
+      {id:1,title:"Term Fee",amount:4500,status:"Pending",due:"15 Oct 2026"},
+      {id:2,title:"Activity Fee",amount:1000,status:"Paid",due:"30 Sep 2026"}
+    ],
+    events: [
+      {id:1,title:"Annual Sports Day",date:"18 Oct 2026",place:"School Ground"},
+      {id:2,title:"Science Exhibition",date:"28 Oct 2026",place:"School Hall"}
+    ],
+    ptm: [{id:1,date:"10 Oct 2026",time:"10:00 AM",className:"XI-A",status:"Scheduled"}],
+    leave: [],
+    feedback: []
+  };
+
+  const clone = x => JSON.parse(JSON.stringify(x));
+  const safeStorage = {
+    get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
+    set(key,val) { try { localStorage.setItem(key,val); } catch (_) {} },
+    remove(key) { try { localStorage.removeItem(key); } catch (_) {} }
+  };
+  const readJSON = (key, fallback) => {
+    try { const v = safeStorage.get(key); return v == null ? clone(fallback) : JSON.parse(v); }
+    catch (_) { return clone(fallback); }
+  };
+  const esc = x => String(x ?? "").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+
+  const S = {
+    user: readJSON(K + "user", null),
+    theme: safeStorage.get(K + "theme") || "light",
+    selectedRole: safeStorage.get(K + "selectedRole") || "Parent"
+  };
+
+  let page = "Dashboard";
+  let open = false;
+
+  function ensureAppRoot() {
+    let el = document.getElementById("app");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "app";
+      (document.body || document.documentElement).appendChild(el);
+    }
+    return el;
+  }
+
+  function schoolId() {
+    return String(S.user?.school || "DEMO01").trim() || "DEMO01";
+  }
+  function dataKey(name) { return `${K}school_${schoolId()}_${name}`; }
+
+  function loadSchoolData() {
+    for (const name of Object.keys(DEFAULTS)) {
+      S[name] = readJSON(dataKey(name), DEFAULTS[name]);
+    }
+  }
+  function saveSchoolData() {
+    for (const name of Object.keys(DEFAULTS)) safeStorage.set(dataKey(name), JSON.stringify(S[name]));
+  }
+  function save() {
+    if (S.user) safeStorage.set(K + "user", JSON.stringify(S.user));
+    safeStorage.set(K + "theme", S.theme);
+    safeStorage.set(K + "selectedRole", S.selectedRole);
+    if (S.user) saveSchoolData();
+  }
+
+  function staff() { return S.user?.role === "Teacher" || S.user?.role === "Admin"; }
+  function admin() { return S.user?.role === "Admin"; }
+
+  function toast(text) {
+    const old = document.querySelector(".edu-toast"); if (old) old.remove();
+    const e = document.createElement("div");
+    e.className = "edu-toast"; e.textContent = text;
+    e.style.cssText = "position:fixed;right:16px;bottom:16px;background:#172033;color:#fff;padding:12px 15px;border-radius:11px;z-index:9999;box-shadow:0 10px 30px #0003;font-size:14px";
+    document.body.appendChild(e); setTimeout(() => e.remove(), 2200);
+  }
+
+  function injectDarkModeCSS() {
+    if (document.getElementById("edu-dark-css")) return;
+    const style = document.createElement("style");
+    style.id = "edu-dark-css";
+    style.textContent = `
+      html[data-theme="dark"] body{background:#0e1420;color:#eef2ff}
+      html[data-theme="dark"] .side,html[data-theme="dark"] .card,html[data-theme="dark"] .pill,html[data-theme="dark"] .loginbox{background:#151d2b;color:#eef2ff;border-color:#293449}
+      html[data-theme="dark"] .muted{color:#aeb8ca}
+      html[data-theme="dark"] .row,html[data-theme="dark"] .table th,html[data-theme="dark"] .table td{border-color:#293449}
+      html[data-theme="dark"] .nav button{color:#b8c1d2}
+      html[data-theme="dark"] .nav button.on,html[data-theme="dark"] .nav button:hover{background:#202b42;color:#91a8ff}
+      html[data-theme="dark"] .btn.ghost,html[data-theme="dark"] .mobile,html[data-theme="dark"] .role,html[data-theme="dark"] .input,html[data-theme="dark"] .textarea{background:#151d2b;color:#eef2ff;border-color:#354158}
+      html[data-theme="dark"] .role.sel{background:#202b42;color:#9eb1ff;border-color:#6e86ef}
+      html[data-theme="dark"] .btn.alt{background:#202b42;color:#9eb1ff}
+      html[data-theme="dark"] .login{background:linear-gradient(135deg,#0d1422,#151d2b)}
+      html[data-theme="dark"] .badge{background:#202b42;color:#a9b9ff}
+      html[data-theme="dark"] .ok{background:#123526;color:#70d49e}
+      .theme-btn{white-space:nowrap}.login-help,.role-note{font-size:12px}.danger{background:#fff0f0;color:#c62828}
+      html[data-theme="dark"] .danger{background:#3a2024;color:#ff9a9a}
+      .mini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function applyTheme() {
+    document.documentElement.dataset.theme = S.theme;
+    if (document.body) document.body.classList.toggle("dark-mode", S.theme === "dark");
+  }
+
+  function selectRole(r) {
+    if (!ROLES.includes(r)) return;
+    S.selectedRole = r; safeStorage.set(K + "selectedRole", r); render();
+  }
+
+  function login() {
+    ensureAppRoot().innerHTML = `
+      <div class="login"><div class="loginbox">
+        <img src="./icon-192.png" alt="EduConnect">
+        <h1>EduConnect</h1><p class="muted">Smart school management in one place.</p>
+        <div class="form">
+          <label for="sc"><b>School code</b></label>
+          <input id="sc" class="input" value="DEMO01" autocomplete="organization">
+          <label for="ph"><b>Phone number</b></label>
+          <input id="ph" class="input" inputmode="numeric" maxlength="10" placeholder="10-digit demo number" autocomplete="tel">
+          <label><b>Continue as</b></label>
+          <div class="roles">${ROLES.map(r => `<button type="button" class="role ${S.selectedRole===r?"sel":""}" aria-pressed="${S.selectedRole===r}" onclick="selectRole('${r}')">${r}</button>`).join("")}</div>
+          <div class="role-note muted">Selected role: <b>${esc(S.selectedRole)}</b>. Choose a role first, then enter your demo number.</div>
+          <button type="button" class="btn" onclick="enter()">Enter EduConnect</button>
+          <button type="button" class="btn ghost theme-btn" onclick="toggleTheme()">${S.theme==="dark"?"☀ Light mode":"☾ Dark mode"}</button>
+          <small class="muted login-help">Demo mode • no real OTP • data stays in this browser</small>
+        </div>
+      </div></div>`;
+  }
+
+  function enter() {
+    const phone = (document.getElementById("ph")?.value || "").trim();
+    const school = (document.getElementById("sc")?.value || "DEMO01").trim().toUpperCase() || "DEMO01";
+    if (!/^\d{10}$/.test(phone)) return toast("Enter a valid 10-digit demo number");
+    S.user = {name:S.selectedRole==="Admin"?"School Admin":S.selectedRole, role:S.selectedRole, phone, school};
+    page="Dashboard"; open=false; loadSchoolData(); save(); render(); toast(`Logged in as ${S.selectedRole}`);
+  }
+
+  function logout() {
+    S.user=null; S.selectedRole="Parent"; page="Dashboard"; open=false;
+    safeStorage.remove(K+"user"); safeStorage.set(K+"selectedRole","Parent"); render();
+  }
+  function toggleTheme() { S.theme=S.theme==="dark"?"light":"dark"; save(); render(); }
+  function go(x) { if (!PAGES.includes(x)) x="Dashboard"; page=x; open=false; render(); }
+  function side() { open=!open; render(); }
+
+  function navItems() {
+    const common=["Dashboard","Homework","Attendance","Timetable","Results","Exams","Fees","Events","PTM","Leave","Feedback","Documents","Study AI","Profile"];
+    return admin() ? [...common,"School Management"] : common;
+  }
+
+  function app() {
+    if (!S.user) return login();
+    loadSchoolData();
+    const items=navItems();
+    ensureAppRoot().innerHTML = `
+      <div class="shell">
+        <aside class="side ${open?"open":""}">
+          <div class="brand"><img src="./icon-192.png" alt="">EduConnect</div>
+          <div class="nav">${items.map(x=>`<button class="${page===x?"on":""}" onclick="go('${x}')">${x}</button>`).join("")}</div>
+          <button class="btn ghost theme-btn" style="position:absolute;bottom:66px;left:14px;right:14px" onclick="toggleTheme()">${S.theme==="dark"?"☀ Light mode":"☾ Dark mode"}</button>
+          <button class="btn ghost" style="position:absolute;bottom:18px;left:14px;right:14px" onclick="logout()">↪ Logout</button>
+        </aside>
+        <main class="main">
+          <div class="top"><div style="display:flex;gap:10px"><button class="mobile" onclick="side()">☰</button><div>
+            <h1>${esc(page)}</h1><div class="muted">${esc(schoolId())} • school workspace</div>
+          </div></div><div class="pill"><div class="avatar">${esc((S.user.name||"?")[0])}</div><div><b>${esc(S.user.name)}</b><div class="muted" style="font-size:12px">${esc(S.user.role)}</div></div></div></div>
+          ${pageContent()}
+        </main>
+      </div>`;
+  }
+
+  function pageContent() {
+    switch(page) {
+      case "Dashboard": return dash();
+      case "Homework": return homework();
+      case "Attendance": return attendance();
+      case "Timetable": return timetable();
+      case "Results": return results();
+      case "Exams": return examsPage();
+      case "Fees": return feesPage();
+      case "Events": return eventsPage();
+      case "PTM": return ptmPage();
+      case "Leave": return leavePage();
+      case "Feedback": return feedbackPage();
+      case "Documents": return docs();
+      case "Study AI": return ai();
+      case "Profile": return profilePage();
+      case "School Management": return schoolManagementPage();
+      default: return dash();
+    }
+  }
+
+  function cardTable(title, rows, headers) {
+    return `<div class="card"><h2>${esc(title)}</h2><table class="table"><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join("")}</tr>${rows}</table></div>`;
+  }
+
+  function dash() {
+    const pending=S.hw.filter(x=>x.st==="Pending").length;
+    return `<div class="card" style="margin-bottom:16px"><div class="muted">${esc(S.user.role)} dashboard</div>
+      <h2 style="margin:6px 0">Welcome, ${esc(S.user.name)} 👋</h2>
+      <p class="muted" style="margin:0">${staff()?"Manage homework, notices and school updates from one place.":"Track homework, attendance, timetable, results and school updates."}</p></div>
+      <div class="grid">${[["Homework",pending,"Pending"],["Attendance","92%","This month"],["Notices",S.nt.length,"Updates"],["Results","8.4","CGPA"]].map(x=>`<div class="card"><div class="muted">${x[0]}</div><div class="num">${x[1]}</div><div class="muted">${x[2]}</div></div>`).join("")}</div>
+      <div class="grid2"><div class="card"><div class="head"><h2>Recent Homework</h2><button class="btn alt" onclick="go('Homework')">View all</button></div>
+      ${S.hw.slice(0,4).map(h=>`<div class="row"><div><b>${esc(h.s)} — ${esc(h.t)}</b><div class="muted">${esc(h.d)}</div></div><span class="badge ${h.st==="Submitted"?"ok":""}">${esc(h.st)}</span></div>`).join("")}</div>
+      <div class="card"><div class="head"><h2>Latest Notices</h2><button class="btn alt" onclick="go('Notices')">Open</button></div>
+      ${S.nt.slice(0,4).map(n=>`<div class="row"><div><b>${esc(n.t)}</b><div class="muted">${esc(n.x)}</div></div><small>${esc(n.d)}</small></div>`).join("")}</div></div>`;
+  }
+
+  function homework() {
+    return `<div class="head"><h2>Homework</h2>${staff()?`<button class="btn" onclick="addHW()">+ Add Homework</button>`:""}</div>
+      <div class="card">${S.hw.length?S.hw.map(h=>`<div class="row"><div><b>${esc(h.s)} — ${esc(h.t)}</b><div class="muted">XI-A • Due ${esc(h.d)}</div></div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><span class="badge ${h.st==="Submitted"?"ok":""}">${esc(h.st)}</span>
+      ${staff()?`<button class="btn ghost danger" onclick="delHW(${h.id})">Delete</button>`:h.st==="Pending"?`<button class="btn alt" onclick="subHW(${h.id})">Submit</button>`:""}</div></div>`).join(""):`<p class="muted">No homework available.</p>`}</div>`;
+  }
+  function addHW(){if(!staff())return toast("Only Teacher/Admin can add homework");const s=prompt("Subject?","Mathematics"),t=prompt("Homework title?","Practice questions"),d=prompt("Due date/text?","Tomorrow");if(!s?.trim()||!t?.trim()||!d?.trim())return;S.hw.unshift({id:Date.now(),s:s.trim(),t:t.trim(),d:d.trim(),st:"Pending"});save();render();toast("Homework added")}
+  function delHW(id){if(!staff())return toast("Only Teacher/Admin can delete homework");if(!S.hw.some(x=>x.id===id)||!confirm("Delete this homework?"))return;S.hw=S.hw.filter(x=>x.id!==id);save();render();toast("Homework deleted")}
+  function subHW(id){if(staff())return toast("Students/Parents submit pending homework here");const h=S.hw.find(x=>x.id===id);if(!h||h.st!=="Pending")return;h.st="Submitted";h.submittedBy=S.user.role;save();render();toast("Homework submitted")}
+
+  function attendance(){return `<div class="grid2"><div class="card"><div class="muted">Monthly attendance</div><div class="num" style="font-size:55px">92%</div><div class="muted">23 present • 2 absent</div></div><div class="card"><h2>Recent days</h2><table class="table">${["01 Oct","30 Sep","29 Sep","28 Sep","27 Sep"].map((d,i)=>`<tr><td>${d}</td><td><span class="badge ${i===2?"":"ok"}">${i===2?"Absent":"Present"}</span></td></tr>`).join("")}</table></div></div>`}
+  function timetable(){return `<div class="card"><table class="table"><tr><th>Day</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr>${["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].map((d,i)=>`<tr><td><b>${d}</b></td><td>Physics</td><td>Mathematics</td><td>Chemistry</td><td>${i%2?"English":"Computer"}</td></tr>`).join("")}</table></div>`}
+
+  function results(){
+    const rows=S.results.map(r=>`<tr><td>${esc(r.exam)}</td><td>${esc(r.subject)}</td><td>${esc(r.marks)}</td><td><span class="badge ok">${esc(r.grade)}</span></td>${staff()?`<td><button class="btn ghost danger" onclick="delResult(${r.id})">Delete</button></td>`:""}</tr>`).join("");
+    return `<div class="head"><h2>Results</h2>${staff()?`<button class="btn" onclick="addResult()">+ Add Result</button>`:""}</div>${cardTable("Academic Results",rows,staff()?["Exam","Subject","Marks","Grade","Action"]:["Exam","Subject","Marks","Grade"])}`;
+  }
+  function addResult(){if(!staff())return toast("Only Teacher/Admin can add results");const exam=prompt("Exam?","Unit Test"),subject=prompt("Subject?","Physics"),marks=prompt("Marks?","90/100"),grade=prompt("Grade?","A");if(!exam?.trim()||!subject?.trim()||!marks?.trim()||!grade?.trim())return;S.results.unshift({id:Date.now(),exam:exam.trim(),subject:subject.trim(),marks:marks.trim(),grade:grade.trim()});save();render();toast("Result added")}
+  function delResult(id){if(!staff())return;if(!confirm("Delete this result?"))return;S.results=S.results.filter(x=>x.id!==id);save();render()}
+
+  function examsPage(){const rows=S.exams.map(e=>`<tr><td>${esc(e.name)}</td><td>${esc(e.subject)}</td><td>${esc(e.date)}</td>${staff()?`<td><button class="btn ghost danger" onclick="delExam(${e.id})">Delete</button></td>`:""}</tr>`).join("");return `<div class="head"><h2>Exams</h2>${staff()?`<button class="btn" onclick="addExam()">+ Add Exam</button>`:""}</div>${cardTable("Exam Schedule",rows,staff()?["Exam","Subject","Date","Action"]:["Exam","Subject","Date"])}`}
+  function addExam(){if(!staff())return toast("Only Teacher/Admin can add exams");const name=prompt("Exam name?","Half Yearly Examination"),subject=prompt("Subject?","Physics"),date=prompt("Date?","30 Oct 2026");if(!name?.trim()||!subject?.trim()||!date?.trim())return;S.exams.unshift({id:Date.now(),name:name.trim(),subject:subject.trim(),date:date.trim()});save();render();toast("Exam added")}
+  function delExam(id){if(!staff()||!confirm("Delete this exam?"))return;S.exams=S.exams.filter(x=>x.id!==id);save();render()}
+
+  function feesPage(){const rows=S.fees.map(f=>`<tr><td>${esc(f.title)}</td><td>₹${Number(f.amount)||0}</td><td>${esc(f.due)}</td><td><span class="badge ${f.status==="Paid"?"ok":""}">${esc(f.status)}</span></td>${staff()?`<td><button class="btn ghost danger" onclick="delFee(${f.id})">Delete</button></td>`:""}</tr>`).join("");return `<div class="head"><h2>Fees</h2>${staff()?`<button class="btn" onclick="addFee()">+ Add Fee</button>`:""}</div>${cardTable("Fee Records",rows,staff()?["Fee","Amount","Due","Status","Action"]:["Fee","Amount","Due","Status"])}`}
+  function addFee(){if(!staff())return toast("Only Teacher/Admin can add fees");const title=prompt("Fee title?","Term Fee"),amount=prompt("Amount?","4500"),status=prompt("Status?","Pending"),due=prompt("Due date?","15 Oct 2026");if(!title?.trim()||!amount?.trim()||!status?.trim()||!due?.trim())return;S.fees.unshift({id:Date.now(),title:title.trim(),amount:Number(amount)||0,status:status.trim(),due:due.trim()});save();render();toast("Fee added")}
+  function delFee(id){if(!staff()||!confirm("Delete this fee?"))return;S.fees=S.fees.filter(x=>x.id!==id);save();render()}
+
+  function eventsPage(){return `<div class="head"><h2>Events</h2>${staff()?`<button class="btn" onclick="addEvent()">+ Add Event</button>`:""}</div><div class="grid2">${S.events.map(e=>`<div class="card"><h3>${esc(e.title)}</h3><div class="muted">${esc(e.date)} • ${esc(e.place)}</div>${staff()?`<button class="btn ghost danger" style="margin-top:10px" onclick="delEvent(${e.id})">Delete</button>`:""}</div>`).join("")}</div>`}
+  function addEvent(){if(!staff())return;const title=prompt("Event?","Annual Sports Day"),date=prompt("Date?","18 Oct 2026"),place=prompt("Place?","School Ground");if(!title?.trim()||!date?.trim()||!place?.trim())return;S.events.unshift({id:Date.now(),title:title.trim(),date:date.trim(),place:place.trim()});save();render()}
+  function delEvent(id){if(!staff()||!confirm("Delete event?"))return;S.events=S.events.filter(x=>x.id!==id);save();render()}
+
+  function ptmPage(){return `<div class="head"><h2>Parent–Teacher Meeting</h2>${staff()?`<button class="btn" onclick="addPTM()">+ Schedule PTM</button>`:""}</div><div class="card">${S.ptm.length?S.ptm.map(p=>`<div class="row"><div><b>${esc(p.date)} • ${esc(p.time)}</b><div class="muted">${esc(p.className)}</div></div><span class="badge ok">${esc(p.status)}</span></div>`).join(""):`<p class="muted">No PTM scheduled.</p>`}</div>`}
+  function addPTM(){if(!staff())return;const date=prompt("Date?","10 Oct 2026"),time=prompt("Time?","10:00 AM"),cls=prompt("Class?","XI-A");if(!date?.trim()||!time?.trim()||!cls?.trim())return;S.ptm.unshift({id:Date.now(),date:date.trim(),time:time.trim(),className:cls.trim(),status:"Scheduled"});save();render()}
+
+  function leavePage(){return `<div class="card"><h2>Leave Requests</h2><button class="btn" onclick="addLeave()">+ Apply Leave</button>${S.leave.length?S.leave.map(l=>`<div class="row"><div><b>${esc(l.from)} → ${esc(l.to)}</b><div class="muted">${esc(l.reason)}</div></div><span class="badge">${esc(l.status)}</span></div>`).join(""):`<p class="muted">No leave requests.</p>`}</div>`}
+  function addLeave(){const from=prompt("From?","05 Oct 2026"),to=prompt("To?","06 Oct 2026"),reason=prompt("Reason?","Personal");if(!from?.trim()||!to?.trim()||!reason?.trim())return;S.leave.unshift({id:Date.now(),from:from.trim(),to:to.trim(),reason:reason.trim(),status:"Pending",by:S.user.role});save();render();toast("Leave request submitted")}
+
+  function feedbackPage(){return `<div class="card"><h2>Feedback</h2><textarea id="feedbackText" class="textarea" rows="5" placeholder="Write your feedback..."></textarea><br><br><button class="btn" onclick="submitFeedback()">Submit Feedback</button></div><div class="card" style="margin-top:16px"><h2>Previous Feedback</h2>${S.feedback.length?S.feedback.map(f=>`<div class="row"><div>${esc(f.text)}<div class="muted">${esc(f.date)} • ${esc(f.by)}</div></div></div>`).join(""):`<p class="muted">No feedback yet.</p>`}</div>`}
+  function submitFeedback(){const text=document.getElementById("feedbackText")?.value.trim();if(!text)return toast("Write feedback first");S.feedback.unshift({id:Date.now(),text,date:new Date().toLocaleDateString("en-IN"),by:S.user.role});save();render();toast("Feedback submitted")}
+
+  function docs(){return `<div class="grid2"><div class="card"><h2>School Documents</h2>${["Academic Calendar 2026–27.pdf","Holiday List.pdf","Exam Guidelines.pdf"].map(x=>`<div class="row"><b>${x}</b><button class="btn alt" onclick="toast('Demo document — PDF backend can be connected later')">Open</button></div>`).join("")}</div><div class="card"><h2>Upload</h2><p class="muted">PDF/image upload UI for the MVP. Files are not uploaded to a server in this zero-cost demo.</p><input class="input" type="file" accept=".pdf,image/*" multiple onchange="toast(this.files.length+' file(s) selected')"></div></div>`}
+  function ai(){return `<div class="card"><h2>Study AI</h2><p class="muted">Demo placeholder. This screen does not call a real AI service yet.</p><textarea id="q" class="textarea" rows="5" placeholder="Explain Newton's second law in simple Hindi..."></textarea><br><br><button class="btn" onclick="ask()">Ask Study AI</button><div id="out"></div></div>`}
+  function ask(){const q=document.getElementById("q")?.value.trim();if(!q)return toast("Write a question first");document.getElementById("out").innerHTML=`<div class="card" style="margin-top:15px"><b>Demo response</b><p class="muted">Question received. The production version can connect this screen to a secure AI service.</p></div>`}
+  function profilePage(){return `<div class="card"><h2>Profile</h2><div class="mini-grid"><div><div class="muted">Name</div><b>${esc(S.user.name)}</b></div><div><div class="muted">Role</div><b>${esc(S.user.role)}</b></div><div><div class="muted">Phone</div><b>${esc(S.user.phone)}</b></div><div><div class="muted">School ID</div><b>${esc(schoolId())}</b></div></div></div>`}
+
+  function schoolManagementPage(){
+    if(!admin()) return `<div class="card"><h2>Access denied</h2><p class="muted">Only Admin can open School Management.</p></div>`;
+    return `<div class="card"><h2>School Management</h2><p class="muted">Current school workspace: <b>${esc(schoolId())}</b></p>
+      <div class="mini-grid"><div><div class="muted">Role</div><b>Admin</b></div><div><div class="muted">Homework</div><b>${S.hw.length}</b></div><div><div class="muted">Results</div><b>${S.results.length}</b></div><div><div class="muted">Fees</div><b>${S.fees.length}</b></div></div></div>
+      <div class="card" style="margin-top:16px"><h2>School settings</h2><button class="btn" onclick="changeSchool()">Switch school workspace</button></div>`;
+  }
+  function changeSchool(){if(!admin())return;const id=prompt("School code?",schoolId());if(!id?.trim())return;S.user.school=id.trim().toUpperCase();page="Dashboard";loadSchoolData();save();render();toast("School workspace changed")}
+
+  function render(){
+    injectDarkModeCSS(); applyTheme();
+    if(!S.user) login(); else app();
+  }
+
+  // Make inline handlers callable from index.html.
+  Object.assign(window,{selectRole,enter,logout,toggleTheme,go,side,addHW,delHW,subHW,addN:()=>{},delN:()=>{},ask,
+    addResult,delResult,addExam,delExam,addFee,delFee,addEvent,delEvent,addPTM,addLeave,submitFeedback,changeSchool,
+    pageContent,render,startApp,feesPage,schoolManagementPage});
+
+  // Retain notice actions from the original MVP, with real role checks.
+  window.addN = function(){
+    if(!staff()) return toast("Only Teacher/Admin can add notices");
+    const title=prompt("Notice title?","School Notice"), text=prompt("Notice text?","Important update"), date=prompt("Date?","Today");
+    if(!title?.trim()||!text?.trim()||!date?.trim())return;
+    S.nt.unshift({id:Date.now(),t:title.trim(),x:text.trim(),d:date.trim()});save();render();toast("Notice added");
+  };
+  window.delN = function(id){
+    if(!staff()||!confirm("Delete this notice?"))return;
+    S.nt=S.nt.filter(x=>x.id!==id);save();render();toast("Notice deleted");
+  };
+
+  function startApp(){
+    // Critical: do not render until DOM exists. This prevents a blank page when
+    // app.js is loaded in <head> without defer.
+    ensureAppRoot();
+    if(S.user) loadSchoolData();
+    render();
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded",startApp,{once:true});
+  else startApp();
+})();
