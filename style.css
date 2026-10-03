@@ -202,3 +202,95 @@ body.dark .premium-card::after{
 body.dark .premium-card::before{
   background:#172033;
   }
+/* UNIQUE EDUCONNECT CARD VISUALS */
+
+.card-attendance .card-art{
+  background:#e8f0ff;
+}
+.card-attendance::after{
+  background:#dce8ff;
+}
+
+.card-homework .card-art{
+  background:#fff3df;
+}
+.card-homework::after{
+  background:#ffecd0;
+}
+
+.card-notices .card-art{
+  background:#fff0f0;
+}
+.card-notices::after{
+  background:#ffe0e0;
+}
+
+.card-results .card-art{
+  background:#eaf8ef;
+}
+.card-results::after{
+  background:#d8f2df;
+}
+
+.card-notifications .card-art{
+  background:#fff4d9;
+}
+.card-notifications::after{
+  background:#ffedbd;
+}
+
+.card-contacts .card-art{
+  background:#f1eaff;
+}
+.card-contacts::after{
+  background:#e6d9ff;
+}
+
+.card-exams .card-art{
+  background:#e9f7f7;
+}
+.card-exams::after{
+  background:#d5eeee;
+}
+
+.card-fees .card-art{
+  background:#edf7e8;
+}
+.card-fees::after{
+  background:#dcefd4;
+}
+
+.card-leave .card-art{
+  background:#fff0e7;
+}
+.card-leave::after{
+  background:#ffe1d0;
+}
+
+.card-events .card-art{
+  background:#f5eaff;
+}
+.card-events::after{
+  background:#ead8ff;
+}
+
+.card-feedback .card-art{
+  background:#e8f5ff;
+}
+.card-feedback::after{
+  background:#d5ebff;
+}
+
+body.dark .card-attendance .card-art,
+body.dark .card-homework .card-art,
+body.dark .card-notices .card-art,
+body.dark .card-results .card-art,
+body.dark .card-notifications .card-art,
+body.dark .card-contacts .card-art,
+body.dark .card-exams .card-art,
+body.dark .card-fees .card-art,
+body.dark .card-leave .card-art,
+body.dark .card-events .card-art,
+body.dark .card-feedback .card-art{
+  background:#1f2937;
+}
