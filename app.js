@@ -235,24 +235,26 @@ function side() {
 
 /* DARK MODE */
 
-function toggleDark() {
-  const isDark = document.body.classList.toggle("dark");
+function applyTheme() {
+  const theme =
+    localStorage.getItem("edu_theme") || "system";
 
-  localStorage.setItem("edu_dark", isDark ? "1" : "0");
+  let dark = false;
 
-  if (S.user) {
-    app();
-  } else {
-    login();
+  if (theme === "dark") {
+    dark = true;
   }
+
+  if (theme === "system") {
+    dark = window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  document.body.classList.toggle("dark", dark);
 }
 
 function loadDark() {
-  if (localStorage.getItem("edu_dark") === "1") {
-    document.body.classList.add("dark");
-  } else {
-    document.body.classList.remove("dark");
-  }
+  applyTheme();
 }
 
 /* MAIN APP */
@@ -366,7 +368,7 @@ function body() {
   if (page === "Results") return results();
   if (page === "Notices") return notices();
   if (page === "Documents") return docs();
-  if (page === "Study AI") return ai();
+  if (page === "Settings") return settings();
 
   return dash();
 }
@@ -818,6 +820,163 @@ function docs() {
   `;
 }
 
+/* SETTINGS */
+
+function settings() {
+  const theme = localStorage.getItem("edu_theme") || "system";
+  const notifications =
+    localStorage.getItem("edu_notifications") !== "0";
+
+  return `
+    <section class="card">
+
+      <h2>⚙️ Settings</h2>
+
+      <p class="muted">
+        Manage your EduConnect preferences.
+      </p>
+
+      <div class="head">
+        <h2>🎨 Appearance</h2>
+      </div>
+
+      <div class="row">
+        <div>
+          <strong>System Default</strong>
+          <small class="muted">
+            Follow your phone's theme
+          </small>
+        </div>
+
+        <button
+          class="btn ${theme === "system" ? "" : "ghost"}"
+          onclick="setTheme('system')"
+        >
+          ${theme === "system" ? "Selected" : "Select"}
+        </button>
+      </div>
+
+      <div class="row">
+        <div>
+          <strong>☀️ White Mode</strong>
+          <small class="muted">
+            Always use light mode
+          </small>
+        </div>
+
+        <button
+          class="btn ${theme === "light" ? "" : "ghost"}"
+          onclick="setTheme('light')"
+        >
+          ${theme === "light" ? "Selected" : "Select"}
+        </button>
+      </div>
+
+      <div class="row">
+        <div>
+          <strong>🌙 Dark Mode</strong>
+          <small class="muted">
+            Always use dark mode
+          </small>
+        </div>
+
+        <button
+          class="btn ${theme === "dark" ? "" : "ghost"}"
+          onclick="setTheme('dark')"
+        >
+          ${theme === "dark" ? "Selected" : "Select"}
+        </button>
+      </div>
+
+      <div class="head">
+        <h2>🔔 Notifications</h2>
+      </div>
+
+      <div class="row">
+        <div>
+          <strong>School Notifications</strong>
+          <small class="muted">
+            Homework, notices and school updates
+          </small>
+        </div>
+
+        <button
+          class="btn ${notifications ? "" : "ghost"}"
+          onclick="toggleNotifications()"
+        >
+          ${notifications ? "ON" : "OFF"}
+        </button>
+      </div>
+
+      <div class="head">
+        <h2>👤 Account</h2>
+      </div>
+
+      <div class="row">
+        <div>
+          <strong>${esc(S.user.name)}</strong>
+          <small class="muted">
+            ${esc(role)} • ${esc(S.user.phone)}
+          </small>
+        </div>
+
+        <button
+          class="btn ghost"
+          onclick="anotherAccount()"
+        >
+          Another Account
+        </button>
+      </div>
+
+      <div class="head">
+        <h2>ℹ️ About</h2>
+      </div>
+
+      <div class="row">
+        <div>
+          <strong>EduConnect</strong>
+          <small class="muted">
+            Smart School Management
+          </small>
+        </div>
+
+        <span class="badge">v1.0 Demo</span>
+      </div>
+
+    </section>
+  `;
+}
+function setTheme(theme) {
+  localStorage.setItem("edu_theme", theme);
+
+  applyTheme();
+
+  render();
+}
+
+function toggleNotifications() {
+  const current =
+    localStorage.getItem("edu_notifications") !== "0";
+
+  localStorage.setItem(
+    "edu_notifications",
+    current ? "0" : "1"
+  );
+
+  toast(current ? "Notifications OFF" : "Notifications ON");
+
+  render();
+}
+
+function anotherAccount() {
+  localStorage.removeItem(K + "user");
+
+  S.user = null;
+  role = "Student";
+  page = "Dashboard";
+
+  render();
+}
 /* STUDY AI */
 
 function ai() {
