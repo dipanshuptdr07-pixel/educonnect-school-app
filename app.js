@@ -42,7 +42,7 @@ const S = {
 };
 
 let page = "Dashboard";
-let role = S.user?.role || "Parent";
+let role = S.user?.role || "Student";
 let open = false;
 
 function save() {
@@ -132,7 +132,7 @@ function login() {
 
           <div class="roles">
 
-            ${["Parent", "Student", "Teacher", "Admin"]
+            ${["Student", "Teacher", "Admin"]
               .map(function (r) {
                 return `
                   <button
@@ -212,7 +212,7 @@ function enter() {
 
 function logout() {
   S.user = null;
-  role = "Parent";
+  role = "Student";
   page = "Dashboard";
 
   localStorage.removeItem(K + "user");
