@@ -1,4 +1,4 @@
-const CACHE = "educonnect-v10";
+const CACHE = "educonnect-v11";
 
 const ASSETS = [
   "./",
@@ -10,65 +10,90 @@ const ASSETS = [
   "./icon-512.png"
 ];
 
-self.addEventListener("install", event => {
+self.addEventListener(
+  "install",
+  event => {
 
-  event.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(ASSETS))
-  );
+    event.waitUntil(
+      caches
+        .open(CACHE)
+        .then(cache =>
+          cache.addAll(ASSETS)
+        )
+    );
 
-  self.skipWaiting();
-});
+    self.skipWaiting();
+  }
+);
 
 
-self.addEventListener("activate", event => {
+self.addEventListener(
+  "activate",
+  event => {
 
-  event.waitUntil(
-
-    caches.keys().then(keys =>
-      Promise.all(
-
-        keys
-          .filter(key => key !== CACHE)
-          .map(key => caches.delete(key))
-
+    event.waitUntil(
+      caches.keys().then(keys =>
+        Promise.all(
+          keys
+            .filter(
+              key => key !== CACHE
+            )
+            .map(
+              key =>
+                caches.delete(key)
+            )
+        )
       )
-    )
+    );
 
-  );
+    self.clients.claim();
+  }
+);
 
-  self.clients.claim();
-});
 
+self.addEventListener(
+  "fetch",
+  event => {
 
-self.addEventListener("fetch", event => {
+    if (
+      event.request.method !==
+      "GET"
+    ) {
+      return;
+    }
 
-  if(event.request.method !== "GET")
-    return;
+    event.respondWith(
 
-  event.respondWith(
+      fetch(event.request)
 
-    fetch(event.request)
-      .then(response => {
+        .then(response => {
 
-        const copy = response.clone();
+          const copy =
+            response.clone();
 
-        caches.open(CACHE)
-          .then(cache =>
-            cache.put(event.request, copy)
-          );
+          caches
+            .open(CACHE)
+            .then(cache =>
+              cache.put(
+                event.request,
+                copy
+              )
+            );
 
-        return response;
+          return response;
+        })
 
-      })
-      .catch(() =>
-        caches.match(event.request)
-          .then(cached =>
-            cached ||
-            caches.match("./index.html")
-          )
-      )
+        .catch(() =>
+          caches
+            .match(event.request)
+            .then(cached =>
+              cached ||
+              caches.match(
+                "./index.html"
+              )
+            )
+        )
 
-  );
-
-});
+    );
+  }
+);
