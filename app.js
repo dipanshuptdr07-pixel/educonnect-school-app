@@ -2080,15 +2080,125 @@ function feesPage() {
                 <div class="card list-card">
 
                   <div>
+function feesPage() {
+  const u = me();
+
+  const list =
+    u.role === "student"
+      ? state.fees.filter(
+          f =>
+            sameSchool(f) &&
+            f.studentId === u.id
+        )
+      : state.fees.filter(
+          sameSchool
+        );
+
+  return `
+    <div class="page-header">
+      <div>
+
+        <div class="eyebrow">
+          FINANCE
+        </div>
+
+        <h1>
+          Fees
+        </h1>
+
+        <p>
+          Student fee records and payment status.
+        </p>
+
+      </div>
+
+      <button
+        class="secondary"
+        onclick="nav('dashboard')"
+      >
+        ← Back to Dashboard
+      </button>
+    </div>
+
+    ${
+      u.role !== "student"
+        ? `
+          <div class="card form-card">
+
+            <h2>
+              Add Fee Record
+            </h2>
+
+            <div class="form-grid">
+
+              <select id="feeStudent">
+                ${studentOptions()}
+              </select>
+
+              <input
+                id="feeTitle"
+                placeholder="Fee title"
+              >
+
+              <input
+                id="feeAmount"
+                type="number"
+                placeholder="Amount"
+              >
+
+              <select id="feeStatus">
+
+                <option value="Pending">
+                  Pending
+                </option>
+
+                <option value="Paid">
+                  Paid
+                </option>
+
+                <option value="Partial">
+                  Partial
+                </option>
+
+              </select>
+
+            </div>
+
+            <button
+              class="primary"
+              onclick="addFee()"
+            >
+              Add Fee
+            </button>
+
+          </div>
+        `
+        : ""
+    }
+
+    <div class="list">
+
+      ${
+        list.length
+          ? list.map(f => {
+
+              const student =
+                state.users.find(
+                  x =>
+                    x.id === f.studentId
+                );
+
+              return `
+                <div class="card list-card">
+
+                  <div>
 
                     ${
-                      u.role !==
-                      "student"
+                      u.role !== "student"
                         ? `
                           <h3>
                             ${esc(
-                              student?.name ||
-                              "-"
+                              student?.name || "-"
                             )}
                           </h3>
                         `
@@ -2106,9 +2216,7 @@ function feesPage() {
                     <strong>
                       ₹${Number(
                         f.amount
-                      ).toLocaleString(
-                        "en-IN"
-                      )}
+                      ).toLocaleString("en-IN")}
                     </strong>
 
                     <span class="badge">
@@ -2119,6 +2227,7 @@ function feesPage() {
 
                 </div>
               `;
+
             }).join("")
           : emptyState(
               "No fee records."
@@ -2127,7 +2236,7 @@ function feesPage() {
 
     </div>
   `;
-}
+                      }
 
 function eventsPage() {
   const u = me();
