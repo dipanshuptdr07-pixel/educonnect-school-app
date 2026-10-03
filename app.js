@@ -85,9 +85,14 @@
   ];
 
   function seed(){
-    if(!localStorage.getItem(K.users)){
-      write(K.users,USERS);
-    }
+    const savedUsers = read(K.users,[]);
+
+if(
+  !Array.isArray(savedUsers) ||
+  !savedUsers.some(u => u.id === "STU001")
+){
+  write(K.users,USERS);
+}
 
     if(!localStorage.getItem(K.school)){
       write(K.school,SCHOOL);
