@@ -238,60 +238,70 @@ if(
     renderApp(user);
   }
 
-  function renderLogin(){
-    document.body.innerHTML = `
-      <div class="login">
-        <div class="loginbox">
-          <img src="./icon-192.png">
-          <h1>EduConnect</h1>
-          <p class="muted">
-            Smart School Management
-          </p>
+function renderLogin(){
+  document.body.innerHTML = `
+    <div class="login">
+      <div class="loginbox">
+        <img src="./icon-192.png">
+        <h1>EduConnect</h1>
+        <p class="muted">
+          Smart School Management
+        </p>
 
-          <div class="form">
-            <input id="schoolCode"
-              class="input"
-              placeholder="School Code"
-              value="DEMO01">
+        <div class="form">
+          <input id="schoolCode"
+            class="input"
+            placeholder="School Code"
+            value="DEMO01">
 
-            <input id="phone"
-              class="input"
-              placeholder="Phone Number"
-              inputmode="numeric">
+          <input id="phone"
+            class="input"
+            placeholder="Phone Number"
+            inputmode="numeric">
 
-            <input id="otp"
-              class="input"
-              placeholder="OTP"
-              inputmode="numeric">
+          <input id="otp"
+            class="input"
+            placeholder="OTP"
+            inputmode="numeric">
 
-            <button class="btn"
-              onclick="handleLogin()">
-              Login
-            </button>
+          <button class="btn" id="loginBtn">
+            Login
+          </button>
 
-            <button class="btn alt"
-              onclick="demoLogin('Student')">
-              Demo Student
-            </button>
+          <button class="btn alt" id="demoStudent">
+            Demo Student
+          </button>
 
-            <button class="btn ghost"
-              onclick="demoLogin('Teacher')">
-              Demo Teacher
-            </button>
+          <button class="btn ghost" id="demoTeacher">
+            Demo Teacher
+          </button>
 
-            <button class="btn ghost"
-              onclick="demoLogin('Admin')">
-              Demo Admin
-            </button>
-          </div>
-
-          <p class="muted" style="margin-top:16px">
-            Demo OTP: 123456
-          </p>
+          <button class="btn ghost" id="demoAdmin">
+            Demo Admin
+          </button>
         </div>
+
+        <p class="muted" style="margin-top:16px">
+          Demo OTP: 123456
+        </p>
       </div>
-    `;
-  }
+    </div>
+  `;
+
+  document.getElementById("loginBtn").onclick = handleLogin;
+
+  document.getElementById("demoStudent").onclick = () => {
+    demoLogin("Student");
+  };
+
+  document.getElementById("demoTeacher").onclick = () => {
+    demoLogin("Teacher");
+  };
+
+  document.getElementById("demoAdmin").onclick = () => {
+    demoLogin("Admin");
+  };
+}
 
   function handleLogin(){
     const code =
