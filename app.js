@@ -388,15 +388,35 @@ function renderLogin(){
     if(side) side.classList.toggle("open");
   }
 
-  function go(page){
-    STATE.page = page;
-    STATE.menu = false;
+  function go(page, push = true){
+  STATE.page = page;
+  STATE.menu = false;
 
-    const side = document.getElementById("side");
-    if(side) side.classList.remove("open");
+  const side = document.getElementById("side");
+  if(side) side.classList.remove("open");
 
-    renderPage();
+  if(push){
+    history.pushState(
+      { page: page },
+      "",
+      "#" + page
+    );
   }
+
+  renderPage();
+  }
+  window.addEventListener("popstate", () => {
+  const page =
+    location.hash.replace("#","") || "dashboard";
+
+  STATE.page = page;
+  STATE.menu = false;
+
+  const side = document.getElementById("side");
+  if(side) side.classList.remove("open");
+
+  renderPage();
+});
     function renderPage(){
     const box = document.getElementById("content");
     if(!box) return;
